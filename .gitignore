@@ -1,0 +1,5 @@
+.vs/
+*.pyproj
+*.sln
+**.pyc
+
