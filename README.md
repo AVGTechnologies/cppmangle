@@ -1,5 +1,7 @@
 # cppmangle
 
+[![Build Status](https://travis-ci.org/AVGTechnologies/cppmangle.svg?branch=master)](https://travis-ci.org/AVGTechnologies/cppmangle)
+
 A library for demangling and mangling Visual Studio C++ names.
 
 ## Installation
