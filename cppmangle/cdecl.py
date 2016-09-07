@@ -8,15 +8,24 @@ def _cdecl_templ_arg(arg):
         return str(arg)
     return cdecl_type(arg)
 
-def _cdecl_name(name):
+def _cdecl_name(name, prev):
+    if name == n_constructor:
+        return prev, None
+    if name == n_destructor:
+        return '~{}'.format(prev), None
     if isinstance(name, SpecialName):
-        return name.desc
+        return name.desc, None
     if isinstance(name, TemplateId):
-        return '{}<{}>'.format(name.name, ', '.join(_cdecl_templ_arg(arg) for arg in name.args))
-    return name
+        return '{}<{}>'.format(name.name, ','.join(_cdecl_templ_arg(arg) for arg in name.args)), name.name
+    return name, name
 
 def _cdecl_qname(qname):
-    return '::'.join(_cdecl_name(name) for name in qname)
+    names = []
+    base_name = None
+    for name in qname:
+        full_name, base_name = _cdecl_name(name, base_name)
+        names.append(full_name)
+    return '::'.join(names)
 
 def cdecl_type(type, obj_name=''):
     prefixes = []
@@ -28,12 +37,16 @@ def cdecl_type(type, obj_name=''):
 
     while True:
         if isinstance(type, SimpleType):
+            if type.basic_type == t_none:
+                break
+
             prefixes.append(_cvs[type.cv])
             prefixes.append(' ')
             prefixes.append(type.basic_type.desc)
             break
 
         if isinstance(type, ClassType):
+            prefixes.append(_cvs[type.cv])
             prefixes.append(' ')
             prefixes.append(_cdecl_qname(type.qname))
             prefixes.append(' ')
@@ -55,19 +68,24 @@ def cdecl_type(type, obj_name=''):
             if type.ref:
                 prefixes.append('& ')
             else:
+                prefixes.append(_cvs[type.cv])
                 prefixes.append('* ')
             type = type.target
             continue
 
         if isinstance(type, FunctionType):
-            prefixes.append('__{} '.format(type.cconv.desc))
+            if not prefixes or prefixes[-1][0] != '*':
+                prefixes.append(' ')
+            prefixes.append('__{}'.format(type.cconv.desc))
             if prio != 0:
                 prefixes.append('(')
                 suffixes.append(')')
                 prio = 0
             suffixes.append('(')
-            suffixes.append(', '.join(cdecl_type(param) for param in type.params))
+            suffixes.append(','.join(cdecl_type(param) for param in type.params))
             suffixes.append(')')
+            if type.this_cv is not None:
+                suffixes.append(_cvs[type.this_cv])
             type = type.ret_type
             continue
 

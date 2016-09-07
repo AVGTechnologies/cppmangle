@@ -4,9 +4,8 @@ from ast import *
 def _transpose(m):
     return dict((m[k], k) for k in m)
 
-_noncv_member_funcs = frozenset([n_constructor, n_destructor])
-
 _basic_type_map = {
+    '@': t_none,
     'X': t_void,
     '_N': t_bool,
     'D': t_char,
@@ -153,7 +152,7 @@ def _p_qname(p):
     return tuple(qname[::-1])
 
 def _p_basic_type(p):
-    c = p(r'[XDCEFGHIJKMNOZ]|_[NJKW]')
+    c = p(r'[@XDCEFGHIJKMNOZ]|_[NJKW]')
     return SimpleType(0, _basic_type_map[c]), len(c) >= 2
 
 _cvs = [0, cv_const, cv_volatile, cv_const | cv_volatile]
@@ -249,7 +248,7 @@ def _p_root(p):
         else:
             kind = fn_instance
 
-    can_have_cv = kind in (fn_instance, fn_virtual) and qname[-1] not in _noncv_member_funcs
+    can_have_cv = kind in (fn_instance, fn_virtual)
     this_cv = ord(p('[A-D]')) - ord('A') if can_have_cv else None
 
     type = p(_p_fn_type)
@@ -379,7 +378,7 @@ def msvc_mangle(obj):
 
             modif = chr(ord('A') + modif)
 
-        can_have_cv = obj.kind in (fn_instance, fn_virtual) and obj.qname[-1] not in _noncv_member_funcs
+        can_have_cv = obj.kind in (fn_instance, fn_virtual)
         this_cv = 'ABCD'[obj.type.this_cv] if can_have_cv else ''
 
         return '?{}{}{}{}'.format(qname, modif, this_cv, type)

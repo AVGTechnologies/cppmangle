@@ -20,19 +20,20 @@ class SimpleType(Type):
 class BasicType(_Enum):
     pass
 
+t_none = BasicType('none')
 t_void = BasicType('void')
 t_bool = BasicType('bool')
 t_char = BasicType('char')
 t_schar = BasicType('signed char')
 t_uchar = BasicType('unsigned char')
 t_sshort = BasicType('short int')
-t_ushort = BasicType('unsigned short int')
+t_ushort = BasicType('unsigned short')
 t_sint = BasicType('int')
 t_uint = BasicType('unsigned int')
 t_slong = BasicType('long')
 t_ulong = BasicType('unsigned long')
-t_slonglong = BasicType('long long')
-t_ulonglong = BasicType('unsigned long long')
+t_slonglong = BasicType('__int64')
+t_ulonglong = BasicType('unsigned __int64')
 t_wchar = BasicType('wchar_t')
 t_float = BasicType('float')
 t_double = BasicType('double')
@@ -80,9 +81,9 @@ class SpecialName(Name):
     def __repr__(self):
         return 'SpecialName({!r})'.format(self.desc)
 
-n_constructor = SpecialName("<constructor>")
-n_def_constr_closure = SpecialName("<default constructor closure>")
-n_destructor = SpecialName("<destructor>")
+n_constructor = SpecialName("`constructor'")
+n_def_constr_closure = SpecialName("`default constructor closure'")
+n_destructor = SpecialName("`destructor'")
 n_op_subscript = SpecialName("operator[]")
 n_op_call = SpecialName("operator()")
 n_op_member = SpecialName("operator->")
