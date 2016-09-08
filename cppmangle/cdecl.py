@@ -19,7 +19,7 @@ def _cdecl_name(name, prev):
         return '{}<{}>'.format(name.name, ','.join(_cdecl_templ_arg(arg) for arg in name.args)), name.name
     return name, name
 
-def _cdecl_qname(qname):
+def cdecl_qname(qname):
     names = []
     base_name = None
     for name in qname:
@@ -48,7 +48,7 @@ def cdecl_type(type, obj_name=''):
         if isinstance(type, ClassType):
             prefixes.append(_cvs[type.cv])
             prefixes.append(' ')
-            prefixes.append(_cdecl_qname(type.qname))
+            prefixes.append(cdecl_qname(type.qname))
             prefixes.append(' ')
             prefixes.append(_class_kinds[type.kind])
             break
@@ -102,6 +102,6 @@ def cdecl_sym(sym):
             r.append('virtual ')
         if sym.kind == fn_class_static:
             r.append('static ')
-        r.append(cdecl_type(sym.type, _cdecl_qname(sym.qname)))
+        r.append(cdecl_type(sym.type, cdecl_qname(sym.qname)))
         return ''.join(r)
     raise RuntimeError('unk')
