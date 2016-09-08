@@ -41,10 +41,11 @@ t_longdouble = BasicType('long double')
 t_ellipsis = BasicType('...')
 
 class PtrType(Type):
-    def __init__(self, cv, target, ref):
+    def __init__(self, cv, target, ref, addr_space):
         super(PtrType, self).__init__(cv)
         self.target = target
         self.ref = ref
+        self.addr_space = addr_space
 
 k_union = 0
 k_struct = 1
@@ -158,9 +159,15 @@ fn_instance = FunctionKind('<non-static non-virtual member fn>')
 fn_virtual = FunctionKind('<virtual member fn>')
 fn_class_static = FunctionKind('<static member fn>')
 
+class AddressSpace(_Enum):
+    pass
+as_default = AddressSpace('<default>')
+as_msvc_x64_absolute = AddressSpace('absolute')
+
 class Function(object):
-    def __init__(self, qname, type, kind, access_spec):
+    def __init__(self, qname, type, kind, access_spec, addr_space):
         self.qname = qname
         self.type = type
         self.kind = kind
         self.access_spec = access_spec
+        self.addr_space = addr_space

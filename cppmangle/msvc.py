@@ -176,17 +176,18 @@ def _p_type(p):
         # pointer to fn
         cv = _cvs[ord(p('[PQRS]6')[0]) - ord('P')]
         fn_type = p(_p_fn_type)
-        return PtrType(cv, fn_type, False), True
+        return PtrType(cv, fn_type, False, as_default), True
 
     with p:
         # pointer types
-        kind = p('[APQRS]E?')[0]
+        kind = p('[APQRS]')
+        addr_space = as_msvc_x64_absolute if p('E?') else as_default
         target_cv = p('[A-D]')
         target, reg = p(_p_type)
         target.cv = _cvs[ord(target_cv) - ord('A')]
 
         cv = _cvs[ord(kind) - ord('P')] if kind != 'A' else 0
-        return PtrType(cv, target, kind == 'A'), True
+        return PtrType(cv, target, kind == 'A', addr_space), True
 
     return p(_p_basic_type)
 
@@ -248,15 +249,21 @@ def _p_root(p):
         else:
             kind = fn_instance
 
+
     can_have_cv = kind in (fn_instance, fn_virtual)
-    this_cv = ord(p('[A-D]')) - ord('A') if can_have_cv else None
+    if can_have_cv:
+        addr_space = as_msvc_x64_absolute if p('E?') else as_default
+        this_cv = ord(p('[A-D]')) - ord('A')
+    else:
+        addr_space = as_default
+        this_cv = None
 
     type = p(_p_fn_type)
     p(p.eof)
 
     type.this_cv = this_cv
 
-    return Function(qname, type, kind, access_class)
+    return Function(qname, type, kind, access_class, addr_space)
 
 def msvc_demangle(s):
     return speg.peg(s, _p_root)
@@ -316,7 +323,7 @@ def _m_type(type, nl, tl):
         if isinstance(type.target, FunctionType):
             return '{}6{}'.format(kind, _m_fn_type(type.target, nl, tl))
         else:
-            return '{}{}{}'.format(kind, 'ABCD'[type.target.cv], _m_type(type.target, nl, tl))
+            return '{}{}{}{}'.format(kind, 'E' if type.addr_space == as_msvc_x64_absolute else '', 'ABCD'[type.target.cv], _m_type(type.target, nl, tl))
     if isinstance(type, ArrayType):
         return 'Y{}{}{}'.format(_m_int(len(type.dims)), ''.join(_m_int(dim) for dim in type.dims), _m_type(type.target, nl, tl))
     if isinstance(type, ClassType):
@@ -378,9 +385,10 @@ def msvc_mangle(obj):
 
             modif = chr(ord('A') + modif)
 
+        addr_space = 'E' if obj.addr_space == as_msvc_x64_absolute else ''
         can_have_cv = obj.kind in (fn_instance, fn_virtual)
         this_cv = 'ABCD'[obj.type.this_cv] if can_have_cv else ''
 
-        return '?{}{}{}{}'.format(qname, modif, this_cv, type)
+        return '?{}{}{}{}{}'.format(qname, modif, addr_space, this_cv, type)
 
     raise RuntimeError('unknown obj')
