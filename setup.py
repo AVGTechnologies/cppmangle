@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='cppmangle',
-    version='0.1',
+    version='0.2',
 
     description='A parser for mangled C++ names',
     author='AVG Technologies CZ, s.r.o.',
