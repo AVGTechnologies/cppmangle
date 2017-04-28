@@ -1,5 +1,5 @@
 import speg
-from ast import *
+from .ast import *
 
 def _transpose(m):
     return dict((m[k], k) for k in m)

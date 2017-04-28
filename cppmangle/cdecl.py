@@ -1,4 +1,4 @@
-from ast import *
+from .ast import *
 
 _cvs = ('', 'const ', 'volatile ', 'const volatile ')
 _class_kinds = ('union', 'struct', 'class', 'enum')
