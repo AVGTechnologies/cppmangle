@@ -13,6 +13,8 @@ setup(
     license='Apache 2.0',
 
     packages=['cppmangle'],
+    install_requires=['speg>=0.3'],
+
     entry_points={
         'console_scripts': [
             'cppdemangle=cppmangle.__main__:main'
