@@ -20,19 +20,20 @@ class SimpleType(Type):
 class BasicType(_Enum):
     pass
 
+t_none = BasicType('none')
 t_void = BasicType('void')
 t_bool = BasicType('bool')
 t_char = BasicType('char')
 t_schar = BasicType('signed char')
 t_uchar = BasicType('unsigned char')
 t_sshort = BasicType('short int')
-t_ushort = BasicType('unsigned short int')
+t_ushort = BasicType('unsigned short')
 t_sint = BasicType('int')
 t_uint = BasicType('unsigned int')
 t_slong = BasicType('long')
 t_ulong = BasicType('unsigned long')
-t_slonglong = BasicType('long long')
-t_ulonglong = BasicType('unsigned long long')
+t_slonglong = BasicType('__int64')
+t_ulonglong = BasicType('unsigned __int64')
 t_wchar = BasicType('wchar_t')
 t_float = BasicType('float')
 t_double = BasicType('double')
@@ -40,10 +41,11 @@ t_longdouble = BasicType('long double')
 t_ellipsis = BasicType('...')
 
 class PtrType(Type):
-    def __init__(self, cv, target, ref):
+    def __init__(self, cv, target, ref, addr_space):
         super(PtrType, self).__init__(cv)
         self.target = target
         self.ref = ref
+        self.addr_space = addr_space
 
 k_union = 0
 k_struct = 1
@@ -80,9 +82,9 @@ class SpecialName(Name):
     def __repr__(self):
         return 'SpecialName({!r})'.format(self.desc)
 
-n_constructor = SpecialName("<constructor>")
-n_def_constr_closure = SpecialName("<default constructor closure>")
-n_destructor = SpecialName("<destructor>")
+n_constructor = SpecialName("`constructor'")
+n_def_constr_closure = SpecialName("`default constructor closure'")
+n_destructor = SpecialName("`destructor'")
 n_op_subscript = SpecialName("operator[]")
 n_op_call = SpecialName("operator()")
 n_op_member = SpecialName("operator->")
@@ -157,9 +159,15 @@ fn_instance = FunctionKind('<non-static non-virtual member fn>')
 fn_virtual = FunctionKind('<virtual member fn>')
 fn_class_static = FunctionKind('<static member fn>')
 
+class AddressSpace(_Enum):
+    pass
+as_default = AddressSpace('<default>')
+as_msvc_x64_absolute = AddressSpace('absolute')
+
 class Function(object):
-    def __init__(self, qname, type, kind, access_spec):
+    def __init__(self, qname, type, kind, access_spec, addr_space):
         self.qname = qname
         self.type = type
         self.kind = kind
         self.access_spec = access_spec
+        self.addr_space = addr_space

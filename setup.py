@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='cppmangle',
-    version='0.1',
+    version='0.2',
 
     description='A parser for mangled C++ names',
     author='AVG Technologies CZ, s.r.o.',
@@ -13,6 +13,8 @@ setup(
     license='Apache 2.0',
 
     packages=['cppmangle'],
+    install_requires=['speg>=0.3'],
+
     entry_points={
         'console_scripts': [
             'cppdemangle=cppmangle.__main__:main'
